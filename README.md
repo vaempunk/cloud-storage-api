@@ -7,6 +7,7 @@
 - add file track
 - add all files / folders / tracks endpoints
 - add security
+- add validation
 - refactor
 
 ### IN PROCESS
