@@ -4,13 +4,14 @@
 
 ### TODO
 
-- add file track
-- add all files / folders / tracks endpoints
+- add validation
 - add security
 - refactor
+- test
 
 ### IN PROCESS
 
+- add all files / folders / tracks endpoints
 
 ### DONE
 
@@ -20,3 +21,7 @@
 - test zipping and tracking functionality
 - refactor logic in services
 - add openapi
+
+## CONSIDER
+
+- add file track
