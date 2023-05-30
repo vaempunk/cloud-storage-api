@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import dev.vaem.cloudstorage.domain.file.FileInfoRepository;
-import dev.vaem.cloudstorage.domain.filesystem.StorageService;
 import dev.vaem.cloudstorage.domain.folder.FolderInfoRepository;
 
 @Service
@@ -29,7 +28,7 @@ public class TrackService {
     private FileInfoRepository fileInfoRepository;
 
     @Autowired
-    private StorageService storageService;
+    private FSTrackService fsTrackService;
 
     public Track getFolderTrack(String trackId) {
         return folderTrackRepository.findById(trackId)
@@ -55,7 +54,7 @@ public class TrackService {
         folderInfoRepository.addTrackByPathStartingWith(folderInfo.getPath(), folderTrack.getId());
         fileInfoRepository.addTrackByPathStartingWith(folderInfo.getPath(), folderTrack.getId());
 
-        storageService.createZipTrack(Path.of(folderTrack.getFolderPath()), folderTrack.getId());
+        fsTrackService.createZipTrack(Path.of(folderTrack.getFolderPath()), folderTrack.getId());
 
         return folderTrack;
     }
@@ -81,7 +80,7 @@ public class TrackService {
                     fileInfoRepository.save(fileInfo);
                 });
 
-        storageService.restoreZipTrack(Path.of(folderTrack.getFolderPath()), trackId);
+        fsTrackService.restoreZipTrack(Path.of(folderTrack.getFolderPath()), trackId);
     }
 
     @Transactional(rollbackFor = IOException.class)
@@ -99,7 +98,7 @@ public class TrackService {
                     fileInfo.getTracks().remove(trackId);
                     fileInfoRepository.save(fileInfo);
                 });
-        storageService.deleteZipTrack(Path.of(folderTrack.getFolderPath()), trackId);
+        fsTrackService.deleteZipTrack(Path.of(folderTrack.getFolderPath()), trackId);
     }
 
 }

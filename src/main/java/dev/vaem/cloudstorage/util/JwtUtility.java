@@ -3,8 +3,10 @@ package dev.vaem.cloudstorage.util;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
 
 import dev.vaem.cloudstorage.config.JwtProperties;
 import dev.vaem.cloudstorage.domain.token.TokenPair;
@@ -13,6 +15,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 
+@Component
 public class JwtUtility {
 
     private RSAPrivateKey privateKey;
@@ -73,7 +76,7 @@ public class JwtUtility {
             if (claims.getExpiration().before(new Date()) || !"access".equals(claims.get("scope", String.class))) {
                 return null;
             }
-            Set<?> rolesObj = claims.get("roles", Set.class);
+            List<?> rolesObj = claims.get("roles", List.class);
             return UserAccount.builder()
                     .id(claims.getSubject())
                     .roles(rolesObj.stream()
@@ -81,6 +84,7 @@ public class JwtUtility {
                             .collect(Collectors.toSet()))
                     .build();
         } catch (JwtException e) {
+            e.printStackTrace();
             return null;
         }
     }

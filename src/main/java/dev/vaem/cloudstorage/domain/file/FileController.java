@@ -8,6 +8,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,7 +19,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.validation.constraints.Min;
+
 @RestController
+@Validated
 public class FileController {
 
     @Autowired
@@ -38,8 +42,8 @@ public class FileController {
     @GetMapping(path = "/files/{fileId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public Resource getChunk(
             @PathVariable("fileId") String fileId,
-            @RequestParam(name = "offset", required = false) Optional<Long> offset,
-            @RequestParam(name = "length", required = false) Optional<Long> length)
+            @RequestParam(name = "offset", required = false) @Min(0) Optional<Long> offset,
+            @RequestParam(name = "length", required = false) @Min(1) Optional<Long> length)
             throws IOException {
         return fileService.getChunk(fileId, offset, length);
     }
@@ -58,12 +62,11 @@ public class FileController {
     public void uploadChunk(
             @PathVariable("fileId") String fileId,
             @RequestParam("chunk") MultipartFile chunk,
-            @RequestParam(name = "offset", required = false) Optional<Long> offset)
+            @RequestParam(name = "offset", required = false) @Min(0) Optional<Long> offset)
             throws IOException {
         fileService.addChunk(fileId, chunk.getBytes(), offset);
     }
 
-    // @Deprecated
     @DeleteMapping("/files/{fileId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteFile(

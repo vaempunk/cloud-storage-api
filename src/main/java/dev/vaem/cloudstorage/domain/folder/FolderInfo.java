@@ -18,8 +18,6 @@ public class FolderInfo {
     @Id
     private String id;
 
-    private String name;
-
     private String path;
 
     private String parentId;
@@ -30,5 +28,9 @@ public class FolderInfo {
     private Set<String> tracks = new HashSet<>();
 
     private Instant dateCreated;
+
+    public String getName() {
+        return path.substring(path.lastIndexOf("/") + 1);
+    }
 
 }

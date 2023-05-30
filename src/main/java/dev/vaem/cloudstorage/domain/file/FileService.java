@@ -15,14 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import dev.vaem.cloudstorage.domain.filesystem.StorageService;
 import dev.vaem.cloudstorage.domain.folder.FolderInfoRepository;
 
 @Service
 public class FileService {
 
     @Autowired
-    private StorageService storageService;
+    private FSFileService fsFileService;
 
     @Autowired
     private FileInfoRepository fileInfoRepository;
@@ -43,7 +42,7 @@ public class FileService {
         var offset = offsetOpt.isPresent() ? offsetOpt.get() : 0;
         var fileInfo = fileInfoRepository.findById(fileId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return storageService.getChunk(Path.of(fileInfo.getPath()), offset, length);
+        return fsFileService.getChunk(Path.of(fileInfo.getPath()), offset, length);
     }
 
     @Transactional(rollbackFor = IOException.class)
@@ -59,7 +58,6 @@ public class FileService {
             filePath = Path.of(name).toString();
         }
         var fileInfo = FileInfo.builder()
-                .name(name)
                 .path(filePath)
                 .folderId(folderId)
                 .isActive(true)
@@ -67,7 +65,7 @@ public class FileService {
                 .dateUpdated(Instant.now())
                 .build();
         fileInfoRepository.save(fileInfo);
-        storageService.uploadFile(Path.of(fileInfo.getPath()), file.getBytes());
+        fsFileService.saveFile(Path.of(fileInfo.getPath()), file.getBytes());
         return fileInfo;
     }
 
@@ -79,7 +77,7 @@ public class FileService {
         fileInfoRepository.save(fileInfo);
 
         var offset = offsetOpt.isPresent() ? offsetOpt.get() : 0;
-        storageService.addChunk(Path.of(fileInfo.getPath()), chunk, offset);
+        fsFileService.addChunk(Path.of(fileInfo.getPath()), chunk, offset);
     }
 
     @Transactional(rollbackFor = IOException.class)
@@ -87,7 +85,7 @@ public class FileService {
         var fileInfo = fileInfoRepository.findById(fileId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        storageService.deleteFile(Path.of(fileInfo.getPath()));
+        fsFileService.deleteFile(Path.of(fileInfo.getPath()));
 
         if (fileInfo.getTracks().isEmpty()) {
             fileInfoRepository.delete(fileInfo);
@@ -96,22 +94,5 @@ public class FileService {
             fileInfoRepository.save(fileInfo);
         }
     }
-
-    // @Transactional(rollbackFor = IOException.class)
-    // public void deleteFile(String fileId, Optional<Long> offsetOpt, Optional<Long> lengthOpt) throws IOException {
-    //     var fileInfo = fileInfoRepository.findById(fileId)
-    //             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-    //     var offset = offsetOpt.isPresent() ? offsetOpt.get() : 0;
-    //     storageService.deleteChunk(Path.of(fileInfo.getPath()),
-    //             offset, lengthOpt);
-
-    //     if (offset == 0 && lengthOpt.isEmpty()) {
-    //         fileInfoRepository.delete(fileInfo);
-    //     } else {
-    //         fileInfo.setDateUpdated(Instant.now());
-    //         fileInfoRepository.save(fileInfo);
-    //     }
-    // }
 
 }

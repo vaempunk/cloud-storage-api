@@ -13,7 +13,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import dev.vaem.cloudstorage.domain.file.FileInfo;
 import dev.vaem.cloudstorage.domain.file.FileInfoRepository;
-import dev.vaem.cloudstorage.domain.filesystem.StorageService;
 
 @Service
 public class FolderService {
@@ -25,7 +24,7 @@ public class FolderService {
     private FileInfoRepository fileInfoRepository;
 
     @Autowired
-    private StorageService storageService;
+    private FSFolderService fsFolderService;
 
     public FolderInfo getFolderInfo(String folderId) {
         return folderInfoRepository.findById(folderId)
@@ -42,7 +41,6 @@ public class FolderService {
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND))
                         .getPath()).resolve(name).toString(); // tostr
         var folderInfo = FolderInfo.builder()
-                .name(name)
                 .path(path)
                 .parentId(parentId)
                 .isActive(true)
@@ -62,7 +60,6 @@ public class FolderService {
         var folderInfo = folderInfoRepository.findById(folderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         var fileInfo = FileInfo.builder()
-                .name(folderInfo.getName() + ".zip")
                 .path(folderInfo.getPath() + ".zip")
                 .folderId(folderInfo.getParentId())
                 .isActive(true)
@@ -71,7 +68,7 @@ public class FolderService {
                 .build();
         fileInfoRepository.save(fileInfo);
 
-        storageService.zipFolder(Path.of(folderInfo.getPath()));
+        fsFolderService.zipFolder(Path.of(folderInfo.getPath()));
         return fileInfo;
     }
 

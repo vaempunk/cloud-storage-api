@@ -38,6 +38,8 @@ public class BearerAuthFilter extends OncePerRequestFilter {
 
         var userToken = new UsernamePasswordAuthenticationToken(userAccount, null, userAccount.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(userToken);
+
+        filterChain.doFilter(request, response);
     }
 
     public String getToken(HttpServletRequest request) {

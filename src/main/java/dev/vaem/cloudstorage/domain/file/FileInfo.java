@@ -18,8 +18,6 @@ public class FileInfo {
     @Id
     private String id;
 
-    private String name;
-
     private String path;
 
     private String folderId;
@@ -32,5 +30,9 @@ public class FileInfo {
     private Instant dateCreated;
 
     private Instant dateUpdated;
+
+    public String getName() {
+        return path.substring(path.lastIndexOf("/") + 1);
+    }
 
 }
